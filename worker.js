@@ -1,24 +1,26 @@
-export default {
-  async fetch(request, env, ctx) {
-    const url = new URL(request.url);
-    if (url.pathname === '/api/ip') {
-      // Get IP from headers
-      const headers = request.headers;
-      const xForwardedFor = headers.get('x-forwarded-for');
-      let myIp = null, proxyIp = null;
-      if (xForwardedFor) {
-        const ips = xForwardedFor.split(',').map(ip => ip.trim());
-        myIp = ips[0];
-        proxyIp = ips.length > 1 ? ips[1] : null;
-      } else {
-        myIp = headers.get('cf-connecting-ip') || 'unknown';
-      }
-      return new Response(JSON.stringify({ myIp, proxyIp }), {
-        headers: { 'Content-Type': 'application/json' }
-      });
+addEventListener('fetch', event => {
+  event.respondWith(handleRequest(event.request));
+});
+
+async function handleRequest(request) {
+  const url = new URL(request.url);
+  if (url.pathname === '/api/ip') {
+    const headers = request.headers;
+    const xForwardedFor = headers.get('x-forwarded-for');
+    let myIp = null, proxyIp = null;
+    if (xForwardedFor) {
+      const ips = xForwardedFor.split(',').map(ip => ip.trim());
+      myIp = ips[0];
+      proxyIp = ips.length > 1 ? ips[1] : null;
+    } else {
+      myIp = headers.get('cf-connecting-ip') || 'unknown';
     }
-    // Serve HTML for all other routes
-    return new Response(`<!DOCTYPE html>
+    return new Response(JSON.stringify({ myIp, proxyIp }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+  // Serve HTML for all other routes
+  return new Response(`<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -57,7 +59,6 @@ export default {
   </script>
 </body>
 </html>`, {
-      headers: { 'Content-Type': 'text/html; charset=UTF-8' }
-    });
-  }
-};
+    headers: { 'Content-Type': 'text/html; charset=UTF-8' }
+  });
+}
