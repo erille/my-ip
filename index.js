@@ -1,27 +1,37 @@
 const express = require('express');
-const requestIp = require('request-ip');
 const app = express();
 const port = 3000;
 
-// Set the view engine to ejs
-app.set('view engine', 'ejs');
+function getClientIp(req) {
+  // Try to get the real client IP from x-forwarded-for or fallback to req.ip
+  const xForwardedFor = req.headers['x-forwarded-for'];
+  if (xForwardedFor) {
+    // x-forwarded-for can be a comma-separated list
+    return xForwardedFor.split(',')[0].trim();
+  }
+  return req.ip;
+}
 
-// Middleware to get the client's IP address
-app.use(requestIp.mw());
+function getProxyIp(req) {
+  const xForwardedFor = req.headers['x-forwarded-for'];
+  if (xForwardedFor) {
+    const ips = xForwardedFor.split(',').map(ip => ip.trim());
+    return ips.length > 1 ? ips[1] : null;
+  }
+  return null;
+}
 
-// Route to handle the home page
 app.get('/', (req, res) => {
-  const clientIp = req.clientIp;
-  const forwardedIps = req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',').map(ip => ip.trim()) : [];
-  const ispIp = forwardedIps.length > 0 ? forwardedIps[0] : clientIp;
-  const proxyIp = forwardedIps.length === 5 ? forwardedIps[1] : null;
+  const myIp = getClientIp(req);
+  const proxyIp = getProxyIp(req);
+  res.sendFile(__dirname + '/views/index.html');
+});
 
-  res.render('index', {
-    appName: 'IP ADDRESS',
-    myIp: ispIp,
-    proxyIp: proxyIp,
-    forwardedIps: forwardedIps
-  });
+// API endpoint to get IPs as JSON
+app.get('/api/ip', (req, res) => {
+  const myIp = getClientIp(req);
+  const proxyIp = getProxyIp(req);
+  res.json({ myIp, proxyIp });
 });
 
 // Start the server
