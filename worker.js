@@ -42,19 +42,23 @@ async function handleRequest(request) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IP Address</title>
   <style>
-    body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: Arial, sans-serif; background: #e0f7fa; }
+    body { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: Arial, sans-serif; background: #e0f7fa; }
     .container { background: #fff; padding: 24px 32px; border-radius: 10px; box-shadow: 0 2px 8px #0001; text-align: center; }
     .ip-box { margin: 16px 0; padding: 12px; border: 1px solid #b2ebf2; border-radius: 6px; background: #f1f8e9; cursor: pointer; }
     .copy-msg { color: green; margin-top: 10px; display: none; }
+    .footer { margin-top: 20px; color: #666; font-size: 12px; }
   </style>
 </head>
-<body>
-  <div class="container">
-    <h1>IP Address</h1>
-    <div id="myIp" class="ip-box" onclick="copyIp('myIp')">My IP: <span></span></div>
-    <div id="proxyIp" class="ip-box" style="display:none" onclick="copyIp('proxyIp')">Proxy IP: <span></span></div>
-    <div id="msg" class="copy-msg">Copied!</div>
-  </div>
+  <body>
+    <div class="container">
+      <h1>IP Address</h1>
+      <div id="myIp" class="ip-box" onclick="copyIp('myIp')">My IP: <span></span></div>
+      <div id="proxyIp" class="ip-box" style="display:none" onclick="copyIp('proxyIp')">Proxy IP: <span></span></div>
+      <div id="msg" class="copy-msg">Copied!</div>
+    </div>
+    <div class="footer">
+      Kepler IP Tool - Build 0.3
+    </div>
   <script>
     fetch('/api/ip').then(r => r.json()).then(data => {
       document.querySelector('#myIp span').textContent = data.myIp || 'N/A';
