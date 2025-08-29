@@ -8,18 +8,24 @@ async function handleRequest(request) {
     const headers = request.headers;
     const xForwardedFor = headers.get('x-forwarded-for');
     const cfConnectingIp = headers.get('cf-connecting-ip');
-    const realIp = headers.get('cf-ray') ? cfConnectingIp : null;
     
     let myIp = null, proxyIp = null;
     
-    if (xForwardedFor) {
+    // Cloudflare's cf-connecting-ip gives us the real client IP
+    if (cfConnectingIp) {
+      myIp = cfConnectingIp;
+      
+      // If there's also x-forwarded-for, the first IP in that chain is the proxy
+      if (xForwardedFor) {
+        const ips = xForwardedFor.split(',').map(ip => ip.trim());
+        // The first IP in x-forwarded-for is the proxy that added this header
+        proxyIp = ips[0];
+      }
+    } else if (xForwardedFor) {
+      // Fallback: if no cf-connecting-ip, use x-forwarded-for logic
       const ips = xForwardedFor.split(',').map(ip => ip.trim());
-      // The last IP in x-forwarded-for is typically the original client IP
-      // The first IP is the most recent proxy
-      myIp = ips[ips.length - 1]; // Original client IP (internet connection)
-      proxyIp = ips[0]; // Most recent proxy IP
-    } else if (realIp) {
-      myIp = realIp;
+      myIp = ips[ips.length - 1]; // Last IP is original client
+      proxyIp = ips[0]; // First IP is proxy
     } else {
       myIp = 'unknown';
     }
