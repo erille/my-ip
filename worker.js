@@ -11,23 +11,21 @@ async function handleRequest(request) {
     
     let myIp = null, proxyIp = null;
     
-    // Cloudflare's cf-connecting-ip gives us the real client IP
-    if (cfConnectingIp) {
-      myIp = cfConnectingIp;
-      
-      // If there's also x-forwarded-for, check if it's different from cf-connecting-ip
-      if (xForwardedFor) {
-        const ips = xForwardedFor.split(',').map(ip => ip.trim());
-        // If the first IP in x-forwarded-for is different from cf-connecting-ip, it's a proxy
-        if (ips[0] !== cfConnectingIp) {
-          proxyIp = ips[0];
-        }
-      }
-    } else if (xForwardedFor) {
-      // Fallback: if no cf-connecting-ip, use x-forwarded-for logic
+    // When behind a proxy, x-forwarded-for contains: proxy_ip, real_client_ip
+    // When not behind a proxy, only cf-connecting-ip is available
+    if (xForwardedFor) {
       const ips = xForwardedFor.split(',').map(ip => ip.trim());
-      myIp = ips[ips.length - 1]; // Last IP is original client
-      proxyIp = ips[0]; // First IP is proxy
+      if (ips.length >= 2) {
+        // Multiple IPs means we're behind a proxy
+        proxyIp = ips[0]; // First IP is the proxy
+        myIp = ips[1]; // Second IP is the real client IP
+      } else {
+        // Single IP in x-forwarded-for
+        myIp = ips[0];
+      }
+    } else if (cfConnectingIp) {
+      // No proxy detected, use cf-connecting-ip
+      myIp = cfConnectingIp;
     } else {
       myIp = 'unknown';
     }
@@ -46,7 +44,7 @@ async function handleRequest(request) {
   <style>
     body { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: Arial, sans-serif; background: #b3e5fc; }
     .container { background: #fff; padding: 24px 32px; border-radius: 10px; box-shadow: 0 2px 8px #0001; text-align: center; }
-    h1 { color: #1565c0; }
+    h1 { color: #1565c0; font-size: 24px; }
     .ip-box { margin: 16px 0; padding: 12px; border: 1px solid #b2ebf2; border-radius: 6px; background: #f1f8e9; cursor: pointer; }
     .copy-msg { color: green; margin-top: 10px; display: none; }
     .description { color: #666; margin-bottom: 20px; font-size: 14px; }
