@@ -11,20 +11,25 @@ async function handleRequest(request) {
     
     let myIp = null, proxyIp = null;
     
-    // When behind a proxy, x-forwarded-for contains: proxy_ip, real_client_ip
-    // When not behind a proxy, only cf-connecting-ip is available
+    // Check for proxy detection using x-forwarded-for
     if (xForwardedFor) {
       const ips = xForwardedFor.split(',').map(ip => ip.trim());
+      
       if (ips.length >= 2) {
-        // Multiple IPs means we're behind a proxy
+        // Multiple IPs detected - we're behind a proxy
         proxyIp = ips[0]; // First IP is the proxy
         myIp = ips[1]; // Second IP is the real client IP
-      } else {
+      } else if (ips.length === 1) {
         // Single IP in x-forwarded-for
         myIp = ips[0];
+        // Check if cf-connecting-ip is different (indicating a proxy)
+        if (cfConnectingIp && cfConnectingIp !== ips[0]) {
+          proxyIp = ips[0];
+          myIp = cfConnectingIp;
+        }
       }
     } else if (cfConnectingIp) {
-      // No proxy detected, use cf-connecting-ip
+      // No x-forwarded-for, use cf-connecting-ip
       myIp = cfConnectingIp;
     } else {
       myIp = 'unknown';
