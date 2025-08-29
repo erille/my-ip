@@ -60,22 +60,23 @@ async function handleRequest(request) {
     <div class="container">
       <h1 id="pageTitle">MY IP ADDRESS</h1>
       <div class="description">Sharing your IP with IT has never been this easy.</div>
-      <div id="myIp" class="ip-box" onclick="copyIp('myIp')">My IP: <span></span></div>
-      <div id="proxyIp" class="ip-box" style="display:none" onclick="copyIp('proxyIp')">Proxy IP: <span></span></div>
+             <div id="myIp" class="ip-box" onclick="copyIp('myIp')">IP: <span></span></div>
+       <div id="proxyIp" class="ip-box" style="display:none" onclick="copyIp('proxyIp')">IP 2: <span></span></div>
       <div id="msg" class="copy-msg">Copied!</div>
     </div>
-                                       <div class="footer">
-         Ketah IP Tool - Build 0.7
-       </div>
+                                                                               <div class="footer">
+          Ketah IP Tool - Build 0.8
+        </div>
   <script>
-    fetch('/api/ip').then(r => r.json()).then(data => {
-      document.querySelector('#myIp span').textContent = data.myIp || 'N/A';
-      if (data.proxyIp) {
-        document.getElementById('proxyIp').style.display = '';
-        document.querySelector('#proxyIp span').textContent = data.proxyIp;
-        document.getElementById('pageTitle').textContent = 'MY IP ADDRESSES';
-      }
-    });
+         fetch('/api/ip').then(r => r.json()).then(data => {
+       document.querySelector('#myIp span').textContent = data.myIp || 'N/A';
+       if (data.proxyIp) {
+         document.getElementById('proxyIp').style.display = '';
+         document.querySelector('#proxyIp span').textContent = data.proxyIp;
+         document.getElementById('pageTitle').textContent = 'MY IP ADDRESSES';
+         document.querySelector('#myIp').innerHTML = 'IP 1: <span>' + (data.myIp || 'N/A') + '</span>';
+       }
+     });
     function copyIp(id) {
       const ip = document.querySelector('#' + id + ' span').textContent;
       navigator.clipboard.writeText(ip).then(() => {
