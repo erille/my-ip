@@ -15,11 +15,11 @@ async function handleRequest(request) {
     if (xForwardedFor) {
       const ips = xForwardedFor.split(',').map(ip => ip.trim());
       
-                                                       if (ips.length >= 2) {
-           // Multiple IPs detected - we're behind a proxy
-           myIp = ips[0]; // First IP is the real client IP
-           proxyIp = ips[1]; // Second IP is the proxy
-         } else if (ips.length === 1) {
+                                                                                                               if (ips.length >= 2) {
+            // Multiple IPs detected - we're behind a proxy
+            myIp = ips[1]; // Second IP is the real client IP
+            proxyIp = ips[0]; // First IP is the proxy
+          } else if (ips.length === 1) {
          // Single IP in x-forwarded-for
          myIp = ips[0];
          // Check if cf-connecting-ip is different (indicating a proxy)
@@ -64,9 +64,9 @@ async function handleRequest(request) {
       <div id="proxyIp" class="ip-box" style="display:none" onclick="copyIp('proxyIp')">Proxy IP: <span></span></div>
       <div id="msg" class="copy-msg">Copied!</div>
     </div>
-                   <div class="footer">
-        Ketah IP Tool - Build 0.6
-      </div>
+                                       <div class="footer">
+         Ketah IP Tool - Build 0.7
+       </div>
   <script>
     fetch('/api/ip').then(r => r.json()).then(data => {
       document.querySelector('#myIp span').textContent = data.myIp || 'N/A';
