@@ -52,32 +52,29 @@ async function handleRequest(request) {
     h1 { color: #1565c0; font-size: 24px; }
     .ip-box { margin: 16px 0; padding: 12px; border: 1px solid #b2ebf2; border-radius: 6px; background: #f1f8e9; cursor: pointer; }
     .copy-msg { color: green; margin-top: 10px; display: none; }
-    .description { color: #666; margin-bottom: 20px; font-size: 14px; }
+    .description { color: #666; margin-bottom: 20px; font-size: 16px; }
     .footer { margin-top: 20px; color: #666; font-size: 12px; }
     .popup { position: fixed; background: #333; color: white; padding: 8px 12px; border-radius: 4px; font-size: 12px; pointer-events: none; z-index: 1000; display: none; }
   </style>
 </head>
   <body>
-    <div class="container">
-      <h1 id="pageTitle">MY IP ADDRESS</h1>
-      <div class="description">Sharing your IP with IT has never been this easy.</div>
-             <div id="myIp" class="ip-box" onclick="copyIp('myIp')">IP: <span></span></div>
-       <div id="proxyIp" class="ip-box" style="display:none" onclick="copyIp('proxyIp')">IP 2: <span></span></div>
+         <div class="container">
+       <div class="description">Sharing your IP with IT has never been this easy.</div>
+              <div id="myIp" class="ip-box" onclick="copyIp('myIp')"><span></span></div>
+        <div id="proxyIp" class="ip-box" style="display:none" onclick="copyIp('proxyIp')"><span></span></div>
              <div id="msg" class="copy-msg">Copied!</div>
      </div>
      <div id="popup" class="popup">IP Copied to clipboard</div>
-                                                                                                                                                               <div class="footer">
-           Ketah IP Tool - Build 0.9
-         </div>
+                                                                                                                                                                                                                                                                                                                               <div class="footer">
+            Ketah IP Tool - Build 1.0
+          </div>
   <script>
                    fetch('/api/ip').then(r => r.json()).then(data => {
         document.querySelector('#myIp span').textContent = data.myIp || 'N/A';
-        if (data.proxyIp) {
-          document.getElementById('proxyIp').style.display = '';
-          document.querySelector('#proxyIp span').textContent = data.proxyIp;
-          document.getElementById('pageTitle').textContent = 'MY IP ADDRESSES';
-          document.querySelector('#myIp').innerHTML = 'IP 1: <span>' + (data.myIp || 'N/A') + '</span>';
-        }
+                 if (data.proxyIp) {
+           document.getElementById('proxyIp').style.display = '';
+           document.querySelector('#proxyIp span').textContent = data.proxyIp;
+         }
         
         // Store IPs globally for copying
         window.ipData = data;
