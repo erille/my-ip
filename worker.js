@@ -7,14 +7,23 @@ async function handleRequest(request) {
   if (url.pathname === '/api/ip') {
     const headers = request.headers;
     const xForwardedFor = headers.get('x-forwarded-for');
+    const cfConnectingIp = headers.get('cf-connecting-ip');
+    const realIp = headers.get('cf-ray') ? cfConnectingIp : null;
+    
     let myIp = null, proxyIp = null;
+    
     if (xForwardedFor) {
       const ips = xForwardedFor.split(',').map(ip => ip.trim());
-      myIp = ips[0];
-      proxyIp = ips.length > 1 ? ips[1] : null;
+      // The last IP in x-forwarded-for is typically the original client IP
+      // The first IP is the most recent proxy
+      myIp = ips[ips.length - 1]; // Original client IP (internet connection)
+      proxyIp = ips[0]; // Most recent proxy IP
+    } else if (realIp) {
+      myIp = realIp;
     } else {
-      myIp = headers.get('cf-connecting-ip') || 'unknown';
+      myIp = 'unknown';
     }
+    
     return new Response(JSON.stringify({ myIp, proxyIp }), {
       headers: { 'Content-Type': 'application/json' }
     });
@@ -49,7 +58,7 @@ async function handleRequest(request) {
       }
     });
     function copyIp(id) {
-      const ip = document.querySelector(`#${id} span`).textContent;
+      const ip = document.querySelector('#' + id + ' span').textContent;
       navigator.clipboard.writeText(ip).then(() => {
         const msg = document.getElementById('msg');
         msg.style.display = 'block';
